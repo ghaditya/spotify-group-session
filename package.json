@@ -1,0 +1,22 @@
+{
+  "name": "spotify-group-session",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ghaditya/spotify-group-session.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ghaditya/spotify-group-session/issues"
+  },
+  "homepage": "https://github.com/ghaditya/spotify-group-session#readme",
+  "dependencies": {
+    "aws-cdk-lib": "^2.88.0"
+  }
+}
