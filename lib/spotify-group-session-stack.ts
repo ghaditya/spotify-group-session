@@ -61,13 +61,6 @@ export class SpotifyGroupSessionStack extends cdk.Stack {
       environment: { [SESSION_QUEUE_ENV_VAR]: sessionQueue.queueUrl }
     });
 
-    const endSessionLambda = new lambda.Function(this, PREFIX + 'EndSessionLambda', {
-      runtime: lambda.Runtime.NODEJS_14_X,
-      handler: 'end-session.handler',
-      code: lambda.Code.fromAsset('backend/api/'),
-      environment: { [SESSION_QUEUE_ENV_VAR]: sessionQueue.queueUrl }
-    });
-
     const joinSessionLambda = new lambda.Function(this, PREFIX + 'JoinSessionLambda', {
       runtime: lambda.Runtime.NODEJS_14_X,
       handler: 'join-session.handler',
@@ -96,7 +89,6 @@ export class SpotifyGroupSessionStack extends cdk.Stack {
     const s3Proxy = pageGateway.root.addResource('{file}');
 
     const startSessionApi = sessionApi.addResource('startSession');
-    const endSessionApi = sessionApi.addResource('endSession');
     const joinSessionApi = sessionApi.addResource('joinSession');
     const leaveSessionApi = sessionApi.addResource('leaveSession');
     const getClientStatusApi = sessionApi.addResource('getClientStatus');
@@ -118,7 +110,6 @@ export class SpotifyGroupSessionStack extends cdk.Stack {
 
     // API to Lambda connections
     startSessionApi.addMethod('POST', new apigateway.LambdaIntegration(startSessionLambda, {}));
-    endSessionApi.addMethod('POST', new apigateway.LambdaIntegration(endSessionLambda, {}));
     joinSessionApi.addMethod('POST', new apigateway.LambdaIntegration(joinSessionLambda, {}));
     leaveSessionApi.addMethod('POST', new apigateway.LambdaIntegration(leaveSessionLambda, {}));
     getClientStatusApi.addMethod('POST', new apigateway.LambdaIntegration(getClientStatusLambda, {}));
@@ -132,12 +123,10 @@ export class SpotifyGroupSessionStack extends cdk.Stack {
 
     sessionIdToClientIdsTable.grantReadData(refreshQueueLambda);
     sessionIdToClientIdsTable.grantReadWriteData(startSessionLambda);
-    sessionIdToClientIdsTable.grantReadWriteData(endSessionLambda);
     sessionIdToClientIdsTable.grantReadWriteData(joinSessionLambda);
     sessionIdToClientIdsTable.grantReadWriteData(leaveSessionLambda);
 
     clientIdToSessionIdTable.grantReadData(getClientStatusLambda);
-    clientIdToSessionIdTable.grantReadWriteData(endSessionLambda);
     clientIdToSessionIdTable.grantReadWriteData(joinSessionLambda);
     clientIdToSessionIdTable.grantReadWriteData(leaveSessionLambda);
     clientIdToSessionIdTable.grantReadWriteData(startSessionLambda);

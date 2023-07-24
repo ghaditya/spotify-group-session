@@ -94,7 +94,7 @@ export const handler = async (event: any = {}): Promise<any> => {
   if (sessionInfo.Item.host == clientId) {
     let clients: string[] = sessionInfo.Item[SESSION_TO_CLIENTS_CLIENT_LIST];
     clients.push(clientId);
-    return endSession(clients, sessionId)
+    return endSession(clients, sessionId);
   } else {
     return leaveSession(clientId, sessionId);
   }
