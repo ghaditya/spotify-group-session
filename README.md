@@ -1,14 +1,20 @@
-# Welcome to your CDK TypeScript project
+# Spotify-Apple Music Group Session Integration
 
-This is a blank project for CDK development with TypeScript.
+## Overview
+This is an application intended to enable Apple Music and Spotify Free users to queue songs in a Spotify group session.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## User Guidelines
+### Setup
+1. Make sure you have Node.js, AWS CLI, and AWS CDK Toolkit installed
+2. Download this repository
+3. Synthesize the cdk stack
+```bash
+cdk synth
+```
+4. Deploy the CDK stack to your AWS account
+```bash
+cdk deploy
+```
 
-## Useful commands
-
-* `npm run build`   compile typescript to js
-* `npm run watch`   watch for changes and compile
-* `npm run test`    perform the jest unit tests
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+### Usage
+Visit the API Gateway page on your AWS dashboard to find the URL to the webpage.
