@@ -5,12 +5,20 @@ import {
     SESSION_TO_CLIENTS_CLIENT_LIST,
     CLIENT_TO_SESSION_TABLE_NAME,
     CLIENT_TO_SESSION_PRIMARY_KEY,
-  } from '../../../constants/constants';
+    ClientType
+} from '../../../constants/constants';
 
 const PARAMETER_ERROR = { statusCode: 400, body: 'Missing required parameters' };
 const INTERNAL_ERROR = { statusCode: 500, body: '' };
+const APPLE_MUSIC_ERROR = { statusCode: 500, body: 'Apple Music integration not yet implemented' };
 
 const db = new ddb.DocumentClient();
+
+export type LeaveSessionRequest = {
+  accessToken: string,
+  sessionId: string,
+  clientType: ClientType
+}; 
 
 const endSession = async (clients: string[], sessionId: string): Promise<any> => {
   const deleteSessionParams: ddb.DocumentClient.Delete = {
@@ -73,10 +81,25 @@ export const handler = async (event: any = {}): Promise<any> => {
   if (!requestBody) {
     return PARAMETER_ERROR;
   }
-  const clientId: string = JSON.parse(requestBody).clientId;
-  const sessionId: string = JSON.parse(requestBody).sessionId;
-  if (!clientId || !sessionId) {
+  const request: LeaveSessionRequest = JSON.parse(requestBody);
+  const accessToken: string = request.accessToken;
+  const clientType: ClientType = request.clientType;
+  const sessionId: string = request.sessionId;
+  if (!accessToken || clientType == undefined || !sessionId) {
     return PARAMETER_ERROR;
+  }
+
+  let clientId;
+  if (clientType == ClientType.SPOTIFY) {
+    const response = await fetch('https://api.spotify.com/v1/me', {
+      headers: {
+        Authorization: 'Bearer ' + accessToken
+      }
+    });
+    const data = await response.json() as { uri: string };
+    clientId = data.uri;
+  } else {
+    return APPLE_MUSIC_ERROR;
   }
 
   const getSessionParams: ddb.DocumentClient.Get = {

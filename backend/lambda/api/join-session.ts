@@ -1,4 +1,5 @@
 import * as ddb from 'aws-sdk/clients/dynamodb';
+import fetch from 'node-fetch';
 import {
     SESSION_TO_CLIENTS_TABLE_NAME,
     SESSION_TO_CLIENTS_PRIMARY_KEY,
@@ -6,26 +7,51 @@ import {
     CLIENT_TO_SESSION_TABLE_NAME,
     CLIENT_TO_SESSION_PRIMARY_KEY,
     ClientToSessionItem,
+    ClientType
   } from '../../../constants/constants';
 
 const PARAMETER_ERROR = { statusCode: 400, body: 'Missing required parameters' };
 const INTERNAL_ERROR = { statusCode: 500, body: '' };
+const APPLE_MUSIC_ERROR = { statusCode: 500, body: 'Apple Music integration not yet implemented' };
+
 
 const db = new ddb.DocumentClient();
+
+export type JoinSessionRequest = {
+  sessionId: string,
+  accessToken: string,
+  refreshToken: string,
+  clientType: ClientType
+}; 
 
 export const handler = async (event: any = {}): Promise<any> => {
   const requestBody = event.body;
   if (!requestBody) {
     return PARAMETER_ERROR;
   }
-  const clientId: string = JSON.parse(requestBody).clientId;
-  const sessionId: string = JSON.parse(requestBody).sessionId;
-  const clientType: number = JSON.parse(requestBody).clientType;
-  if (!clientId || !sessionId || !clientType) {
+  const request: JoinSessionRequest = JSON.parse(requestBody);
+  const accessToken: string = request.accessToken;
+  const refreshToken: string = request.refreshToken;
+  const clientType: ClientType = request.clientType;
+  const sessionId: string = request.sessionId;
+  if (!accessToken || !refreshToken || clientType == undefined || !sessionId) {
     return PARAMETER_ERROR;
   }
 
-  const clientItem: ClientToSessionItem = { clientId, sessionId, clientType, host: false };
+  let clientId;
+  if (clientType == ClientType.SPOTIFY) {
+    const response = await fetch('https://api.spotify.com/v1/me', {
+      headers: {
+        Authorization: 'Bearer ' + accessToken
+      }
+    });
+    const data = await response.json() as { uri: string };
+    clientId = data.uri;
+  } else {
+    return APPLE_MUSIC_ERROR;
+  }
+
+  const clientItem: ClientToSessionItem = { clientId, sessionId, clientType, host: false, accessToken, refreshToken };
   const clientParams: ddb.DocumentClient.PutItemInput = {
     TableName: CLIENT_TO_SESSION_TABLE_NAME,
     Item: clientItem,

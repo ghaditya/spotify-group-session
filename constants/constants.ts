@@ -21,6 +21,8 @@ export type SessionToClientsItem = {
 export type ClientToSessionItem = {
   [CLIENT_TO_SESSION_PRIMARY_KEY]: string,
   sessionId: string,
+  accessToken: string,
+  refreshToken: string,
   clientType: ClientType,
   host: boolean
 };
